@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import LoginPage from "./pages/Login";
+import "./App.css";
+import { Switch, Route, Redirect } from "react-router-dom";
+import DashboardPage from "./pages/Dashboard";
+import { connect } from "react-redux";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+let jwtToken = null;
+
+class App extends React.Component {
+  render() {
+    return (
+      <div className="App-header">
+        <Switch>
+          <Route exact path="/user/login">
+            <LoginPage />
+          </Route>
+          <Route path="/dashboard">
+            <DashboardPage />
+          </Route>
+          <Route exact path="/">
+            {this.props.loggedIn ? <Redirect to="/dashboard"/> : <Redirect to="/user/login"/>}
+          </Route>
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  let token = state.jwt.value;
+  if (!token)
+    return {
+      loggedIn: false,
+    };
+  if (token != jwtToken) {
+    document.cookie = `jwt=${token}`;
+  }
+  return {
+    isLoggedIn: true,
+  };
+};
+
+export default connect(mapStateToProps)(App)
